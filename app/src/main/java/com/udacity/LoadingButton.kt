@@ -1,5 +1,7 @@
 package com.udacity
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Canvas
@@ -25,8 +27,10 @@ class LoadingButton @JvmOverloads constructor(
     private var textColor = 0
     private var textSize = 0f
     private var text = ""
+    private var loadingText = ""
 
     private var currentProgressPercentage = 0f
+    private var latestProgressPercentage = 0f
     private var textWidth = 0f
 
     private val textPosition: PointF = PointF(0f, 0f)
@@ -36,7 +40,31 @@ class LoadingButton @JvmOverloads constructor(
     private val valueAnimator = ValueAnimator()
 
     private var buttonState: ButtonState by Delegates.observable<ButtonState>(ButtonState.Completed) { p, old, new ->
+        when (new) {
+            ButtonState.Clicked -> {
+                text = "Clicked"
+                invalidate()
+            }
 
+            ButtonState.Loading -> {
+                startLoadingAnimation(0f, 80f, 5000)
+            }
+
+            ButtonState.Completed -> {
+                cancelLoadingAnimation()
+                startLoadingAnimation(latestProgressPercentage, 100f, 500)
+            }
+        }
+    }
+
+    fun setState(state: ButtonState) {
+        buttonState = state
+    }
+
+    private fun resetButton() {
+        text = context.getString(R.string.button_download)
+        currentProgressPercentage = 0f
+        invalidate()
     }
 
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -54,6 +82,7 @@ class LoadingButton @JvmOverloads constructor(
             textColor = getColor(R.styleable.LoadingButton_textColor, 0)
             textSize = convertSpToPixels(getString(R.styleable.LoadingButton_textSize) ?: "0sp")
             text = getString(R.styleable.LoadingButton_text) ?: ""
+            loadingText = getString(R.styleable.LoadingButton_loadingText) ?: ""
         }
 
         isClickable = true
@@ -61,18 +90,13 @@ class LoadingButton @JvmOverloads constructor(
 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
-        paint.color = backgroundColor
-        canvas?.drawRect(0f, 0f, widthSize.toFloat(), heightSize.toFloat(), paint)
+        drawButton(canvas)
+        drawProgressBar(canvas)
+        drawButtonText(canvas)
+        drawProgressCircular(canvas)
+    }
 
-        paint.color = progressBarColor
-        val currentProgressButtonPosition = currentProgressPercentage / 100 * widthSize
-        canvas?.drawRect(0f, 0f, currentProgressButtonPosition, heightSize.toFloat(), paint)
-
-        paint.color = textColor
-        paint.textSize = textSize
-        textPosition.computeXYForText()
-        canvas?.drawText(text, textPosition.x, textPosition.y, paint)
-
+    private fun drawProgressCircular(canvas: Canvas?) {
         paint.color = progressCircularColor
         val sweepAngle = currentProgressPercentage / 100 * 360
         circularProgressPosition.computeXYForCircularProgress()
@@ -83,6 +107,24 @@ class LoadingButton @JvmOverloads constructor(
             circularProgressPosition.y + circularProgressRadius,
             -90f, sweepAngle, true, paint
         )
+    }
+
+    private fun drawButtonText(canvas: Canvas?) {
+        paint.color = textColor
+        paint.textSize = textSize
+        textPosition.computeXYForText()
+        canvas?.drawText(text, textPosition.x, textPosition.y, paint)
+    }
+
+    private fun drawProgressBar(canvas: Canvas?) {
+        paint.color = progressBarColor
+        val currentProgressButtonPosition = currentProgressPercentage / 100 * widthSize
+        canvas?.drawRect(0f, 0f, currentProgressButtonPosition, heightSize.toFloat(), paint)
+    }
+
+    private fun drawButton(canvas: Canvas?) {
+        paint.color = backgroundColor
+        canvas?.drawRect(0f, 0f, widthSize.toFloat(), heightSize.toFloat(), paint)
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -98,27 +140,45 @@ class LoadingButton @JvmOverloads constructor(
         setMeasuredDimension(w, h)
     }
 
-    fun startLoadingAnimation() {
+    private fun startLoadingAnimation(
+        fromProgress: Float = 0f,
+        toProgress: Float = 100f,
+        animationDuration: Long = 1000
+    ) {
         // Set text to loading
-        text = context.getString(R.string.button_loading)
+        text = loadingText
 
         // Start animation
         valueAnimator.apply {
-            setFloatValues(0f, 100f)
-            duration = 2000
+            setFloatValues(fromProgress, toProgress)
+            duration = animationDuration
             addUpdateListener {
                 currentProgressPercentage = it.animatedValue as Float
+                latestProgressPercentage = currentProgressPercentage
                 invalidate()
             }
         }
+
+        valueAnimator.addListener(object : AnimatorListenerAdapter() {
+            override fun onAnimationEnd(animation: Animator) {
+                if (buttonState == ButtonState.Completed) {
+                    resetButton()
+                }
+            }
+        })
         valueAnimator.start()
+    }
+
+    private fun cancelLoadingAnimation() {
+        valueAnimator.cancel()
     }
 
     private fun PointF.computeXYForText() {
         val bounds = Rect()
         paint.getTextBounds(text, 0, text.length, bounds)
         val textHeight = bounds.height()
-        textWidth = bounds.width().toFloat()
+        textWidth = bounds.width()
+            .toFloat() // TODO: consider move this text's width calculation to computeXYForCircularProgress
 
         x = (widthSize / 2).toFloat()
         y = ((heightSize + textHeight) / 2).toFloat()
