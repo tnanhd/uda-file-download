@@ -11,12 +11,10 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.provider.Settings
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.content.ContextCompat
 import com.udacity.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
@@ -35,14 +33,30 @@ class MainActivity : AppCompatActivity() {
             if (id == downloadId) {
                 binding.includedLayout.customButton.setState(ButtonState.Completed)
 
-                Toast.makeText(context, "Download Completed", Toast.LENGTH_SHORT).show()
+                val detailIntent = Intent(this@MainActivity, DetailActivity::class.java).apply {
+                    putExtra(
+                        "fileName",
+                        "Retrofit - Type-safe HTTP client for Android and Java by Square, Inc."
+                    )
+                    putExtra("status", "Success")
+                }
+                pendingIntent = PendingIntent.getActivity(
+                    applicationContext,
+                    NOTIFICATION_ID,
+                    detailIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
 
-                notificationManager = ContextCompat.getSystemService(
-                    context,
-                    NotificationManager::class.java
-                ) as NotificationManager
+                action = NotificationCompat.Action.Builder(
+                    R.drawable.ic_assistant_black_24dp,
+                    applicationContext.getString(R.string.notification_action_text),
+                    pendingIntent
+                ).build()
+
                 notificationManager.sendNotification(
                     context.getString(R.string.notification_description),
+                    pendingIntent,
+                    action,
                     context
                 )
             }

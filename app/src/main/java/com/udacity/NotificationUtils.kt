@@ -4,25 +4,17 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
-import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
 
-private const val NOTIFICATION_ID = 0
+const val NOTIFICATION_ID = 0
 
-fun NotificationManager.sendNotification(messageBody: String, applicationContext: Context) {
-    val detailIntent = Intent(applicationContext, DetailActivity::class.java)
-    val detailPendingIntent = PendingIntent.getActivity(
-        applicationContext,
-        NOTIFICATION_ID,
-        detailIntent,
-        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-    )
-    val action = NotificationCompat.Action.Builder(
-        R.drawable.ic_assistant_black_24dp,
-        applicationContext.getString(R.string.notification_action_text),
-        detailPendingIntent
-    ).build()
+fun NotificationManager.sendNotification(
+    messageBody: String,
+    pendingIntent: PendingIntent,
+    action: NotificationCompat.Action,
+    applicationContext: Context
+) {
 
     val notificationBuilder = NotificationCompat.Builder(
         applicationContext,
@@ -31,7 +23,7 @@ fun NotificationManager.sendNotification(messageBody: String, applicationContext
         .setSmallIcon(R.drawable.ic_assistant_black_24dp)
         .setContentTitle(applicationContext.getString(R.string.notification_title))
         .setContentText(messageBody)
-        .setContentIntent(detailPendingIntent)
+        .setContentIntent(pendingIntent)
         .setAutoCancel(true)
         .setPriority(NotificationCompat.PRIORITY_DEFAULT)
         .addAction(action)
