@@ -11,24 +11,30 @@ import androidx.core.app.NotificationCompat
 private const val NOTIFICATION_ID = 0
 
 fun NotificationManager.sendNotification(messageBody: String, applicationContext: Context) {
-    val contentIntent = Intent(applicationContext, MainActivity::class.java)
-    val contentPendingIntent = PendingIntent.getActivity(
+    val detailIntent = Intent(applicationContext, DetailActivity::class.java)
+    val detailPendingIntent = PendingIntent.getActivity(
         applicationContext,
         NOTIFICATION_ID,
-        contentIntent,
+        detailIntent,
         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
     )
+    val action = NotificationCompat.Action.Builder(
+        R.drawable.ic_assistant_black_24dp,
+        applicationContext.getString(R.string.notification_action_text),
+        detailPendingIntent
+    ).build()
 
     val notificationBuilder = NotificationCompat.Builder(
         applicationContext,
-        applicationContext.getString(R.string.file_download_notification_channel_id)
+        applicationContext.getString(R.string.notification_channel_id)
     )
         .setSmallIcon(R.drawable.ic_assistant_black_24dp)
         .setContentTitle(applicationContext.getString(R.string.notification_title))
         .setContentText(messageBody)
-        .setContentIntent(contentPendingIntent)
+        .setContentIntent(detailPendingIntent)
         .setAutoCancel(true)
         .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+        .addAction(action)
 
     notify(NOTIFICATION_ID, notificationBuilder.build())
 }
@@ -38,9 +44,13 @@ fun NotificationManager.createNotificationChannel(channelId: String, channelName
         val notificationChannel = NotificationChannel(
             channelId,
             channelName,
-            NotificationManager.IMPORTANCE_HIGH
+            NotificationManager.IMPORTANCE_DEFAULT
         )
 
         createNotificationChannel(notificationChannel)
     }
+}
+
+fun NotificationManager.cancelNotifications() {
+    cancelAll()
 }

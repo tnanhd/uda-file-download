@@ -42,7 +42,7 @@ class MainActivity : AppCompatActivity() {
                     NotificationManager::class.java
                 ) as NotificationManager
                 notificationManager.sendNotification(
-                    context.getString(R.string.app_description),
+                    context.getString(R.string.notification_description),
                     context
                 )
             }
@@ -57,8 +57,8 @@ class MainActivity : AppCompatActivity() {
 
         notificationManager = getSystemService(NotificationManager::class.java)
         notificationManager.createNotificationChannel(
-            getString(R.string.file_download_notification_channel_id),
-            getString(R.string.file_download_notification_channel_name)
+            getString(R.string.notification_channel_id),
+            getString(R.string.notification_channel_name)
         )
 
         requestNotificationsPermissionFromUser()
@@ -67,6 +67,7 @@ class MainActivity : AppCompatActivity() {
 
         binding.includedLayout.customButton.setOnClickListener {
             binding.includedLayout.customButton.setState(ButtonState.Loading)
+            notificationManager.cancelNotifications()
             download()
         }
     }
