@@ -18,7 +18,8 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:progressColor="@color/colorPrimaryDark"
+        app:progressBarColor="@color/colorPrimaryDark"
+        app:progressCircularColor="@color/colorAccent"
         app:text="@string/download"
         app:textColor="@android:color/white"
         app:textSize="@dimen/default_text_size" />
