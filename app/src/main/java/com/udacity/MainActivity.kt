@@ -9,6 +9,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.net.Uri
 import android.os.Bundle
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
 import com.udacity.databinding.ActivityMainBinding
@@ -31,10 +32,10 @@ class MainActivity : AppCompatActivity() {
 
         registerReceiver(receiver, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
 
-        // TODO: Implement code below
-//        binding.custom_button.setOnClickListener {
-//            download()
-//        }
+
+        binding.includedLayout.customButton.setOnClickListener {
+            binding.includedLayout.customButton.startLoadingAnimation()
+        }
     }
 
     private val receiver = object : BroadcastReceiver() {

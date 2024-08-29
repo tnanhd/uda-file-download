@@ -20,9 +20,12 @@ class LoadingButton @JvmOverloads constructor(
 
     // Custom attributes
     private var backgroundColor = 0
+    private var progressColor = 0
     private var textColor = 0
     private var textSize = 0.0f
     private var text = ""
+
+    private var currentProgressAnimationPosition = 0.0f
 
     private val screenHeight = context.resources.displayMetrics.heightPixels
 
@@ -44,16 +47,22 @@ class LoadingButton @JvmOverloads constructor(
     init {
         context.withStyledAttributes(attrs, R.styleable.LoadingButton) {
             backgroundColor = getColor(R.styleable.LoadingButton_backgroundColor, 0)
+            progressColor = getColor(R.styleable.LoadingButton_progressColor, 0)
             textColor = getColor(R.styleable.LoadingButton_textColor, 0)
             textSize = convertSpToPixels(getString(R.styleable.LoadingButton_textSize) ?: "0sp")
             text = getString(R.styleable.LoadingButton_text) ?: ""
         }
+
+        isClickable = true
     }
 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
         paint.color = backgroundColor
         canvas?.drawRect(0f, 0f, widthSize.toFloat(), heightSize.toFloat(), paint)
+
+        paint.color = progressColor
+        canvas?.drawRect(0.0f, 0.0f, currentProgressAnimationPosition, heightSize.toFloat(), paint)
 
         paint.color = textColor
         paint.textSize = textSize
@@ -72,6 +81,22 @@ class LoadingButton @JvmOverloads constructor(
         widthSize = w
         heightSize = h
         setMeasuredDimension(w, h)
+    }
+
+    fun startLoadingAnimation() {
+        // Set text to loading
+        text = context.getString(R.string.button_loading)
+
+        // Start animation
+        valueAnimator.apply {
+            setFloatValues(0f, widthSize.toFloat())
+            duration = 1000
+            addUpdateListener {
+                currentProgressAnimationPosition = it.animatedValue as Float
+                invalidate()
+            }
+        }
+        valueAnimator.start()
     }
 
     private fun PointF.computeXYForText() {
