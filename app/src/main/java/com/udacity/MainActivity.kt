@@ -10,8 +10,13 @@ import android.content.IntentFilter
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
+import android.provider.Settings
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
 import com.udacity.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
@@ -24,11 +29,39 @@ class MainActivity : AppCompatActivity() {
     private lateinit var pendingIntent: PendingIntent
     private lateinit var action: NotificationCompat.Action
 
+    private val receiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent?) {
+            val id = intent?.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
+            if (id == downloadId) {
+                binding.includedLayout.customButton.setState(ButtonState.Completed)
+
+                Toast.makeText(context, "Download Completed", Toast.LENGTH_SHORT).show()
+
+                notificationManager = ContextCompat.getSystemService(
+                    context,
+                    NotificationManager::class.java
+                ) as NotificationManager
+                notificationManager.sendNotification(
+                    context.getString(R.string.app_description),
+                    context
+                )
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
+
+        notificationManager = getSystemService(NotificationManager::class.java)
+        notificationManager.createNotificationChannel(
+            getString(R.string.file_download_notification_channel_id),
+            getString(R.string.file_download_notification_channel_name)
+        )
+
+        requestNotificationsPermissionFromUser()
 
         registerReceiver(receiver, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
 
@@ -38,12 +71,22 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private val receiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            val id = intent?.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
-            if (id == downloadId) {
-                binding.includedLayout.customButton.setState(ButtonState.Completed)
-            }
+    private fun requestNotificationsPermissionFromUser() {
+        val notificationsEnabled = NotificationManagerCompat.from(this).areNotificationsEnabled()
+        if (!notificationsEnabled) {
+            AlertDialog.Builder(this)
+                .setTitle(getString(R.string.request_notifications_permission_dialog_title))
+                .setMessage(getString(R.string.request_notifications_permission_dialog_message_body))
+                .setPositiveButton(getString(R.string.enable)) { dialog, _ ->
+                    val intent = Intent().apply {
+                        action = Settings.ACTION_APP_NOTIFICATION_SETTINGS
+                        putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
+                    }
+                    startActivity(intent)
+                    dialog.dismiss()
+                }
+                .setNegativeButton(getString(R.string.cancel)) { dialog, _ -> dialog.dismiss() }
+                .show()
         }
     }
 
@@ -51,7 +94,6 @@ class MainActivity : AppCompatActivity() {
         val request = DownloadManager.Request(Uri.parse(URL))
             .setTitle(getString(R.string.app_name))
             .setDescription(getString(R.string.app_description))
-            .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
             .setDestinationInExternalFilesDir(this, Environment.DIRECTORY_DOWNLOADS, "")
             .setRequiresCharging(false)
             .setAllowedOverMetered(true)
