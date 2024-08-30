@@ -1,6 +1,7 @@
 package com.udacity
 
 import android.app.NotificationManager
+import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.udacity.databinding.ActivityDetailBinding
@@ -22,5 +23,11 @@ class DetailActivity : AppCompatActivity() {
         val status = intent?.extras?.getString(KEY_STATUS)
         binding.includedLayout.fileName.text = fileName
         binding.includedLayout.status.text = status
+
+        binding.includedLayout.okButton.setOnClickListener {
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+            finish()
+        }
     }
 }
