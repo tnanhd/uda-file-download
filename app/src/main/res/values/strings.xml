@@ -11,11 +11,6 @@
     <string name="notification_channel_description">File Download notification</string>
     <string name="notification_action_text">Check the status</string>
 
-    <string name="request_notifications_permission_dialog_title">Enable Notifications</string>
-    <string name="request_notifications_permission_dialog_message_body">Notifications are turned off. Please enable them to stay updated.</string>
-    <string name="enable">Enable</string>
-    <string name="cancel">Cancel</string>
-
     <string name="glide_description">Glide - Image Loading Library by BumpTech</string>
     <string name="loadapp_description">LoadApp - Current repository by Udacity</string>
     <string name="retrofit_description">Retrofit - Type-safe HTTP client for Android and Java by Square, Inc</string>
@@ -30,4 +25,5 @@
     <string name="file_name">File name:</string>
     <string name="status">Status:</string>
     <string name="download_image">Image: Cloud download image</string>
+    <string name="permission_denied_message">Permission denied. Please enable it in the app setting for the app to work properly.</string>
 </resources>

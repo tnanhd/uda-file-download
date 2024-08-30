@@ -7,16 +7,17 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Environment
-import android.provider.Settings
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
 import com.udacity.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
@@ -121,21 +122,38 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun requestNotificationsPermissionFromUser() {
-        val notificationsEnabled = NotificationManagerCompat.from(this).areNotificationsEnabled()
-        if (!notificationsEnabled) {
-            AlertDialog.Builder(this)
-                .setTitle(getString(R.string.request_notifications_permission_dialog_title))
-                .setMessage(getString(R.string.request_notifications_permission_dialog_message_body))
-                .setPositiveButton(getString(R.string.enable)) { dialog, _ ->
-                    val intent = Intent().apply {
-                        action = Settings.ACTION_APP_NOTIFICATION_SETTINGS
-                        putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
-                    }
-                    startActivity(intent)
-                    dialog.dismiss()
+        // For API <= 32, declared POST_NOTIFICATION permission in Manifest
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    android.Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(android.Manifest.permission.POST_NOTIFICATIONS),
+                    NOTIFICATION_PERMISSION_REQUEST_CODE
+                )
+            }
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        when (requestCode) {
+            NOTIFICATION_PERMISSION_REQUEST_CODE -> {
+                if (grantResults.isEmpty() || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(
+                        this,
+                        getString(R.string.permission_denied_message),
+                        Toast.LENGTH_LONG
+                    ).show()
                 }
-                .setNegativeButton(getString(R.string.cancel)) { dialog, _ -> dialog.dismiss() }
-                .show()
+            }
         }
     }
 
@@ -171,3 +189,5 @@ enum class DownloadSrc(val url: String, val title: String, val shortName: String
         "Retrofit"
     )
 }
+
+const val NOTIFICATION_PERMISSION_REQUEST_CODE = 0
