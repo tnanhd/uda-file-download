@@ -18,8 +18,8 @@ class DetailActivity : AppCompatActivity() {
         val notificationManager = getSystemService(NotificationManager::class.java)
         notificationManager.cancelNotifications()
 
-        val fileName = intent?.extras?.getString("fileName")
-        val status = intent?.extras?.getString("status")
+        val fileName = intent?.extras?.getString(KEY_FILE_NAME)
+        val status = intent?.extras?.getString(KEY_STATUS)
         binding.includedLayout.fileName.text = fileName
         binding.includedLayout.status.text = status
     }

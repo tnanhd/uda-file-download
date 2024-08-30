@@ -11,6 +11,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.provider.Settings
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
@@ -23,6 +24,8 @@ class MainActivity : AppCompatActivity() {
 
     private var downloadId: Long = 0
 
+    private var downloadOption: DownloadSrc? = null
+
     private lateinit var notificationManager: NotificationManager
     private lateinit var pendingIntent: PendingIntent
     private lateinit var action: NotificationCompat.Action
@@ -33,12 +36,20 @@ class MainActivity : AppCompatActivity() {
             if (id == downloadId) {
                 binding.includedLayout.customButton.setState(ButtonState.Completed)
 
+                var downloadStatus = getString(R.string.fail)
+                val cursor = context.getSystemService(DownloadManager::class.java).query(
+                    DownloadManager.Query().setFilterById(downloadId)
+                )
+                if (cursor.moveToFirst()) {
+                    val status = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS))
+                    if (status == DownloadManager.STATUS_SUCCESSFUL) {
+                        downloadStatus = context.getString(R.string.success)
+                    }
+                }
+
                 val detailIntent = Intent(this@MainActivity, DetailActivity::class.java).apply {
-                    putExtra(
-                        "fileName",
-                        "Retrofit - Type-safe HTTP client for Android and Java by Square, Inc."
-                    )
-                    putExtra("status", "Success")
+                    putExtra(KEY_FILE_NAME, downloadOption?.title)
+                    putExtra(KEY_STATUS, downloadStatus)
                 }
                 pendingIntent = PendingIntent.getActivity(
                     applicationContext,
@@ -54,7 +65,7 @@ class MainActivity : AppCompatActivity() {
                 ).build()
 
                 notificationManager.sendNotification(
-                    context.getString(R.string.notification_description),
+                    context.getString(R.string.notification_description, downloadOption?.title),
                     pendingIntent,
                     action,
                     context
@@ -80,9 +91,25 @@ class MainActivity : AppCompatActivity() {
         registerReceiver(receiver, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
 
         binding.includedLayout.customButton.setOnClickListener {
-            binding.includedLayout.customButton.setState(ButtonState.Loading)
             notificationManager.cancelNotifications()
+
+            if (downloadOption == null) {
+                Toast.makeText(this, "Please select an option to download", Toast.LENGTH_SHORT)
+                    .show()
+                return@setOnClickListener
+            }
+
+            binding.includedLayout.customButton.setState(ButtonState.Clicked)
             download()
+        }
+
+        binding.includedLayout.downloadOptions.setOnCheckedChangeListener { _, checkedId ->
+            downloadOption = when (checkedId) {
+                R.id.download_glide_option -> DownloadSrc.GLIDE
+                R.id.download_loadapp_option -> DownloadSrc.LOAD_APP
+                R.id.download_retrofit_option -> DownloadSrc.RETROFIT
+                else -> null
+            }
         }
     }
 
@@ -106,9 +133,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun download() {
-        val request = DownloadManager.Request(Uri.parse(URL))
-            .setTitle(getString(R.string.app_name))
-            .setDescription(getString(R.string.app_description))
+        val request = DownloadManager.Request(Uri.parse(downloadOption?.url))
+            .setTitle(downloadOption?.shortName)
+            .setDescription(downloadOption?.title)
             .setDestinationInExternalFilesDir(this, Environment.DIRECTORY_DOWNLOADS, "")
             .setRequiresCharging(false)
             .setAllowedOverMetered(true)
@@ -117,10 +144,22 @@ class MainActivity : AppCompatActivity() {
         val downloadManager = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
         downloadId = downloadManager.enqueue(request)
     }
+}
 
-    companion object {
-        private const val URL =
-            "https://github.com/udacity/nd940-c3-advanced-android-programming-project-starter/archive/master.zip"
-        private const val CHANNEL_ID = "channelId"
-    }
+enum class DownloadSrc(val url: String, val title: String, val shortName: String) {
+    GLIDE(
+        "https://github.com/bumptech/glide/archive/master.zip",
+        "Glide: Image Loading Library by BumpTech",
+        "Glide"
+    ),
+    LOAD_APP(
+        "https://github.com/udacity/nd940-c3-advanced-android-programming-project-starter/archive/master.zi",
+        "LoadApp - Current repository by Udacity",
+        "LoadApp"
+    ),
+    RETROFIT(
+        "https://github.com/square/retrofit/archive/master.zip",
+        "Retrofit - Type-safe HTTP client for Android and Java by Square, Inc",
+        "Retrofit"
+    )
 }

@@ -9,6 +9,42 @@
     tools:context=".MainActivity"
     tools:showIn="@layout/activity_main">
 
+
+    <RadioGroup
+        android:id="@+id/download_options"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/margin_large"
+        app:layout_constraintBottom_toTopOf="@+id/custom_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <RadioButton
+            android:id="@+id/download_glide_option"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/glide_description"
+            android:textSize="20sp" />
+
+        <RadioButton
+            android:id="@+id/download_loadapp_option"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/default_margin"
+            android:text="@string/loadapp_description"
+            android:textSize="20sp" />
+
+        <RadioButton
+            android:id="@+id/download_retrofit_option"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/default_margin"
+            android:text="@string/retrofit_description"
+            android:textSize="20sp" />
+    </RadioGroup>
+
+
     <com.udacity.LoadingButton
         android:id="@+id/custom_button"
         android:layout_width="0dp"
@@ -18,10 +54,10 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
+        app:loadingText="@string/button_loading"
         app:progressBarColor="@color/colorPrimaryDark"
         app:progressCircularColor="@color/colorAccent"
         app:text="@string/button_download"
-        app:loadingText="@string/button_loading"
         app:textColor="@android:color/white"
         app:textSize="@dimen/default_text_size" />
 

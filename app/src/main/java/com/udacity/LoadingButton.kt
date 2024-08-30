@@ -39,15 +39,18 @@ class LoadingButton @JvmOverloads constructor(
 
     private val valueAnimator = ValueAnimator()
 
-    private var buttonState: ButtonState by Delegates.observable<ButtonState>(ButtonState.Completed) { p, old, new ->
+    private var buttonState: ButtonState by Delegates.observable<ButtonState>(ButtonState.Completed) { _, _, new ->
         when (new) {
             ButtonState.Clicked -> {
-                text = "Clicked"
-                invalidate()
+                startLoadingAnimation(0f, 40f, 2000)
             }
 
             ButtonState.Loading -> {
-                startLoadingAnimation(0f, 80f, 5000)
+                startLoadingAnimation(
+                    latestProgressPercentage,
+                    95f,
+                    60000
+                ) // Show really slow progress
             }
 
             ButtonState.Completed -> {
@@ -161,6 +164,12 @@ class LoadingButton @JvmOverloads constructor(
 
         valueAnimator.addListener(object : AnimatorListenerAdapter() {
             override fun onAnimationEnd(animation: Animator) {
+                super.onAnimationEnd(animation)
+                if (buttonState == ButtonState.Clicked) {
+                    // Show the really slow progress for big files
+                    buttonState = ButtonState.Loading
+                }
+
                 if (buttonState == ButtonState.Completed) {
                     resetButton()
                 }
