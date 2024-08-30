@@ -27,4 +27,6 @@
 
     <string name="success">Success</string>
     <string name="fail">Fail</string>
+    <string name="file_name">File name:</string>
+    <string name="status">Status:</string>
 </resources>

@@ -159,6 +159,7 @@ enum class DownloadSrc(val url: String, val title: String, val shortName: String
         "Glide: Image Loading Library by BumpTech",
         "Glide"
     ),
+    // url is wrong -> status = fail
     LOAD_APP(
         "https://github.com/udacity/nd940-c3-advanced-android-programming-project-starter/archive/master.zi",
         "LoadApp - Current repository by Udacity",

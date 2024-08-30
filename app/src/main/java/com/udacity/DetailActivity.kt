@@ -23,6 +23,11 @@ class DetailActivity : AppCompatActivity() {
         val status = intent?.extras?.getString(KEY_STATUS)
         binding.includedLayout.fileName.text = fileName
         binding.includedLayout.status.text = status
+        if (status == getString(R.string.success)) {
+            binding.includedLayout.status.setTextColor(getColor(R.color.colorPrimaryDark))
+        } else if (status == getString(R.string.fail)) {
+            binding.includedLayout.status.setTextColor(getColor(R.color.colorAccent))
+        }
 
         binding.includedLayout.okButton.setOnClickListener {
             val intent = Intent(this, MainActivity::class.java)

@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.motion.widget.MotionLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context=".DetailActivity"
+    app:layoutDescription="@xml/content_detail_motion"
     tools:showIn="@layout/activity_detail">
 
     <TextView
@@ -15,7 +16,7 @@
         android:layout_marginStart="24dp"
         android:layout_marginTop="48dp"
         android:alpha="0.8"
-        android:text="File name:"
+        android:text="@string/file_name"
         android:textSize="20sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -37,10 +38,10 @@
         android:id="@+id/status_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:alpha="0.8"
-        android:text="Status:"
-        android:textSize="20sp"
         android:layout_marginTop="24dp"
+        android:alpha="0.8"
+        android:text="@string/status"
+        android:textSize="20sp"
         app:layout_constraintStart_toStartOf="@+id/file_name_label"
         app:layout_constraintTop_toBottomOf="@+id/file_name" />
 
@@ -61,12 +62,12 @@
         android:layout_height="60dp"
         android:layout_margin="@dimen/default_margin"
         android:background="@color/colorAccent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
         android:text="OK"
         android:textColor="@android:color/white"
-        android:textSize="@dimen/default_text_size" />
+        android:textSize="@dimen/default_text_size"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline"
@@ -74,4 +75,4 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         app:layout_constraintGuide_begin="205dp" />
-</androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.constraintlayout.motion.widget.MotionLayout>
